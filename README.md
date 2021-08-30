@@ -58,6 +58,7 @@ Visando propor um melhor entendimento sobre algumas das principais funcionalidad
 ```python
 # Importando bibliotecas
 import jaiminho.exchange as jex
+from exchangelib.errors import UnauthorizedError
 import os
 from dotenv import find_dotenv, load_dotenv
 
