@@ -2,6 +2,15 @@
   <img src="https://i.imgur.com/Y5cCw3T.png", alt="jaiminho logo">
 </h1>
 
+<div align="center">  
+  
+  ![Release](https://img.shields.io/badge/release-ok-brightgreen)
+  [![PyPI](https://img.shields.io/pypi/v/xplotter?color=blue)](https://pypi.org/project/jaiminho/)
+  ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jaiminho?color=lightblue)
+  ![PyPI - Status](https://img.shields.io/pypi/status/jaiminho)
+
+</div>
+
 ## Table of content
 
 - [Sobre o jaiminho](#sobre-o-jaiminho)
