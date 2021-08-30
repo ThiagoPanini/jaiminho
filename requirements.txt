@@ -20,7 +20,7 @@ ipykernel==6.2.0
 ipython==7.27.0
 ipython-genutils==0.2.0
 isodate==0.6.0
--e git+https://github.com/ThiagoPanini/jaiminho.git@2173485c5083dc4ef765804d0e7560e7314ede8e#egg=jaiminho
+-e git+https://github.com/ThiagoPanini/jaiminho.git@0c3da4eee0b9f92c59ac1765592317252aefd4f0#egg=jaiminho
 jedi==0.18.0
 Jinja2==3.0.1
 jsonschema==3.2.0
@@ -45,6 +45,7 @@ pandas==1.3.2
 pandocfilters==1.4.3
 parso==0.8.2
 pickleshare==0.7.5
+pretty-html-table==0.9.11
 prometheus-client==0.11.0
 prompt-toolkit==3.0.20
 pycparser==2.20
