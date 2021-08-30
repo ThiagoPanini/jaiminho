@@ -28,8 +28,7 @@ Table of Contents
 ---------------------------------------------------
 """
 
-# Códigos úteis AWS
-from exchangelib.properties import HTMLBody
+# Funcionalidades
 import jaiminho.exchange as jex
 from exchangelib.errors import UnauthorizedError
 
