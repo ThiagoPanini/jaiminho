@@ -196,11 +196,13 @@ jex.send_mail(
     mail_box=MAIL_BOX,
     mail_to=MAIL_TO,
     subject='[Jaiminho] exchange_tests.py [5]',
-    body='5º teste de envio de e-mails com Jaiminho'
+    body='5º teste de envio de e-mails com Jaiminho',
+    send=False
 )
 
 # Preparando zip de anexo para envio (nomes e arquivos)
-attachments = zip(PATHS, MEM_ATTACHMENTS)
+FILENAMES = [os.path.basename(p) for p in PATHS]
+attachments = zip(FILENAMES, MEM_ATTACHMENTS)
 
 # Enviando e-mail com anexos
 jex.send_mail(
@@ -211,6 +213,7 @@ jex.send_mail(
     mail_to=MAIL_TO,
     subject='[Jaiminho] exchange_tests.py [6]',
     body='6º teste de envio de e-mails com Jaiminho',
-    zip_attachments=attachments
+    zip_attachments=attachments,
+    send=False
 )
 
