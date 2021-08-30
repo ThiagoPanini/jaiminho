@@ -108,7 +108,7 @@ m = jex.create_message(
 
 # Anexando arquivo local à imagem
 LOCAL_FILENAME = os.path.join(PROJECT_PATH, 'README.md')
-m = jex.attach_file_to_message(
+m = jex.attach_file(
     message=m,
     file=LOCAL_FILENAME,
     attachment_name=os.path.basename(LOCAL_FILENAME)
@@ -126,7 +126,7 @@ PPT_FILENAME = os.path.join(WORK_PATH, 'voice-unlocker/auxiliar/ppt/modelos/Comp
 # Gerando lista completa e iterando para anexos individuais
 ATTACHMENTS = [IMG_FILENAME, CSV_FILENAME, TXT_FILENAME, PYTHON_FILENAME, PDF_FILENAME, PPT_FILENAME]
 for file in ATTACHMENTS:
-    m = jex.attach_file_to_message(
+    m = jex.attach_file(
     message=m,
     file=file,
     attachment_name=os.path.basename(file)
@@ -151,7 +151,7 @@ m = jex.create_message(
 
 # Anexando arquivos em memória
 for name, file in zip(PATHS, MEM_ATTACHMENTS):
-    m = jex.attach_file_to_message(
+    m = jex.attach_file(
     message=m,
     file=file,
     attachment_name=os.path.basename(name)
@@ -159,4 +159,58 @@ for name, file in zip(PATHS, MEM_ATTACHMENTS):
 assert len(m.attachments) == len(MEM_ATTACHMENTS), f'Anexo de dados em memória falou. Total de anexos ({len(m.attachments)}) difere do esperado ({len(MEM_ATTACHMENTS)})'
 #m.send_and_save()
 
+
+"""
+---------------------------------------------------
+----------- 2. TESTANDO FUNCIONALIDADES -----------
+    2.3 Enviando DataFrames no corpo do e-mail
+---------------------------------------------------
+"""
+
+# Preparando e transformando DataFrame
+df_filter = df.loc[:5, ['player_name', 'player_team', 'game_date', 'matchup', 'wl']]
+df_html = jex.df_to_html(df=df_filter)
+
+# Gerando imagem simples
+m = jex.create_message(
+    account=acc,
+    subject='[Jaiminho] exchange_tests.py [4]',
+    body='4º teste de envio de e-mails com Jaiminho\n\n' + df_html,
+    to_recipients=MAIL_TO
+)
+#m.send_and_save()
+
+
+"""
+---------------------------------------------------
+----------- 2. TESTANDO FUNCIONALIDADES -----------
+    2.4 Envio de e-mail utilizando função única
+---------------------------------------------------
+"""
+
+# Enviando e-mail sem nenhum tipo de anexo
+jex.send_mail(
+    username=MAIL_USERNAME,
+    password=os.getenv('PASSWORD'),
+    server=SERVER,
+    mail_box=MAIL_BOX,
+    mail_to=MAIL_TO,
+    subject='[Jaiminho] exchange_tests.py [5]',
+    body='5º teste de envio de e-mails com Jaiminho'
+)
+
+# Preparando zip de anexo para envio (nomes e arquivos)
+attachments = zip(PATHS, MEM_ATTACHMENTS)
+
+# Enviando e-mail com anexos
+jex.send_mail(
+    username=MAIL_USERNAME,
+    password=os.getenv('PASSWORD'),
+    server=SERVER,
+    mail_box=MAIL_BOX,
+    mail_to=MAIL_TO,
+    subject='[Jaiminho] exchange_tests.py [6]',
+    body='6º teste de envio de e-mails com Jaiminho',
+    zip_attachments=attachments
+)
 
