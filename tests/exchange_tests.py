@@ -8,17 +8,21 @@ Table of Contents
 ---------------------------------------------------
 1. Configurações iniciais
     1.1 Importando bibliotecas
-    1.2 Configurando logs
-    1.3 Definindo variáveis do projeto
-2. Gerenciando buckets e objetos
-    2.1 Criando e configurando bucket
-    2.2 Realizando upload de objetos
-    2.3 Realizando o download de objetos
+    1.2 Definindo variáveis do projeto
+2. Testando funcionalidades
+    2.1 Criação básica de conta e mensagem
+    2.2 Anexo de arquivos locais 
+    2.3 Anexo de arquivo após leitura em memória
+    2.4 Leitura e anexo de arquivo direto em memória
+    2.5 Enviando DataFrames no corpo do e-mail
+    2.6 Envio de e-mail utilizando função única
+    2.7 Utilizando função única com anexos
+    2.8 Utilizando função única com imagem no body
 ---------------------------------------------------
 """
 
 # Author: Thiago Panini
-# Date: 29/08/2021
+# Date: 27/09/2021
 
 
 """
@@ -36,6 +40,7 @@ from exchangelib.errors import UnauthorizedError
 import os
 from dotenv import find_dotenv, load_dotenv
 import pandas as pd
+import requests
 
 
 """
@@ -45,13 +50,12 @@ import pandas as pd
 ---------------------------------------------------
 """
 
-# Definindo variávies de diretório
-ROOT_PATH = os.path.expanduser('~')
-WORK_PATH = os.path.join(ROOT_PATH, 'workspaces')
-PROJECT_PATH = os.getcwd()
-
 # Lendo variáveis de ambiente
 load_dotenv(find_dotenv())
+
+# Definindo variávies de diretório
+WORK_PATH = os.getenv('WORK_PATH')
+PROJECT_PATH = os.getcwd()
 
 # Coletando variáveis
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
@@ -77,31 +81,31 @@ try:
         mail_box=MAIL_BOX
     )
 except UnauthorizedError as ue:
-    print(f'Erro de autorização ao realizar login no servidor. Exception: {ue}')
-    exit()
+    print(f'Erro de autorização ao realizar login no servidor')
+    raise ue
 
-# Gerando imagem simples
+# Gerando mensagem simples
 m = jex.create_message(
     account=acc,
-    subject='[Jaiminho] exchange_tests.py [1]',
-    body='1º teste de envio de e-mails com Jaiminho',
+    subject='[Jaiminho] exchange_tests.py [1] - Mensagem Simples',
+    body='Criando e enviando mensagem simples por e-mail via connect_exchange() e create_message()',
     to_recipients=MAIL_TO
 )
-#m.send_and_save()
+m.send_and_save()
 
 
 """
 ---------------------------------------------------
 ----------- 2. TESTANDO FUNCIONALIDADES -----------
-      2.2 Anexo de arquivos locais e em memória
+           2.2 Anexo de arquivos locais 
 ---------------------------------------------------
 """
 
-# Gerando imagem simples
+# Gerando mensagem simples
 m = jex.create_message(
     account=acc,
-    subject='[Jaiminho] exchange_tests.py [2]',
-    body='2º teste de envio de e-mails com Jaiminho',
+    subject='[Jaiminho] exchange_tests.py [2] - Anexo Local',
+    body='Enviando e-mail anexando arquivo local via attach_file()',
     to_recipients=MAIL_TO
 )
 
@@ -115,12 +119,12 @@ m = jex.attach_file(
 assert len(m.attachments) >= 1, 'Anexo de arquivo falhou. Mensagem não possui elementos anexos mesmo após chamada da função'
 
 # Definição de caminhos para diferentes arquivos a serem anexados
-IMG_FILENAME = os.path.join(WORK_PATH, 'nbaflow/dev/data/images/players/Damian Lillard.png')
-CSV_FILENAME = os.path.join(WORK_PATH, 'nbaflow/dev/data/backup/2020-21_gamelog.csv')
-TXT_FILENAME = os.path.join(PROJECT_PATH, 'requirements.txt')
-PYTHON_FILENAME = os.path.join(PROJECT_PATH, 'setup.py')
-PDF_FILENAME = os.path.join(WORK_PATH, 'voice-unlocker/auxiliar/tg_reconhecimento_voz_thiago_panini.pdf')
-PPT_FILENAME = os.path.join(WORK_PATH, 'voice-unlocker/auxiliar/ppt/modelos/Computer Science Proposal by Slidesgo.pptx')
+IMG_FILENAME = os.getenv('IMG_FILENAME')
+CSV_FILENAME = os.getenv('CSV_FILENAME')
+TXT_FILENAME = os.getenv('TXT_FILENAME')
+PYTHON_FILENAME = os.getenv('PYTHON_FILENAME')
+PDF_FILENAME = os.getenv('PDF_FILENAME')
+PPT_FILENAME = os.getenv('PPT_FILENAME')
 
 # Gerando lista completa e iterando para anexos individuais
 ATTACHMENTS = [IMG_FILENAME, CSV_FILENAME, TXT_FILENAME, PYTHON_FILENAME, PDF_FILENAME, PPT_FILENAME]
@@ -131,7 +135,15 @@ for file in ATTACHMENTS:
     attachment_name=os.path.basename(file)
 )
 assert len(m.attachments) == len(ATTACHMENTS) + 1, f'Anexo de múltiplos arquivos falhou. Total de anexos ({len(m.attachments)}) difere do esperado ({len(ATTACHMENTS) + 1})'
-#m.send_and_save()
+m.send_and_save()
+
+
+"""
+---------------------------------------------------
+----------- 2. TESTANDO FUNCIONALIDADES -----------
+    2.3 Anexo de arquivo após leitura em memória
+---------------------------------------------------
+"""
 
 # Leitura de imagem e DataFrame em memória para anexo
 with open(IMG_FILENAME, 'rb') as f:
@@ -140,11 +152,11 @@ df = pd.read_csv(CSV_FILENAME)
 MEM_ATTACHMENTS = [img, df]
 PATHS = [IMG_FILENAME, CSV_FILENAME]
 
-# Gerando imagem simples
+# Gerando mensagem simples
 m = jex.create_message(
     account=acc,
-    subject='[Jaiminho] exchange_tests.py [3]',
-    body='3º teste de envio de e-mails com Jaiminho',
+    subject='[Jaiminho] exchange_tests.py [3] - Objetos em Memória',
+    body='Enviando e-mail após leitura e anexo de DataFrame e imagem em memória',
     to_recipients=MAIL_TO
 )
 
@@ -156,13 +168,43 @@ for name, file in zip(PATHS, MEM_ATTACHMENTS):
     attachment_name=os.path.basename(name)
 )
 assert len(m.attachments) == len(MEM_ATTACHMENTS), f'Anexo de dados em memória falou. Total de anexos ({len(m.attachments)}) difere do esperado ({len(MEM_ATTACHMENTS)})'
-#m.send_and_save()
+m.send_and_save()
 
 
 """
 ---------------------------------------------------
 ----------- 2. TESTANDO FUNCIONALIDADES -----------
-    2.3 Enviando DataFrames no corpo do e-mail
+ 2.4 Leitura e anexo de arquivo direto em memória
+---------------------------------------------------
+"""
+
+# Aplicando requests online de imagem
+url = 'https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/203081.png'
+r = requests.get(url)
+img = r.content
+
+# Gerando mensagem simples
+m = jex.create_message(
+    account=acc,
+    subject='[Jaiminho] exchange_tests.py [4] - Imagem Baixada e Anexada',
+    body='Enviando e-mail após requisição online de imagem e anexo direto da memória do conteúdo em bytes',
+    to_recipients=MAIL_TO
+)
+
+# Anexando arquivo
+m = jex.attach_file(
+    message=m,
+    file=img,
+    attachment_name='Damian Lillard.png'
+)
+assert len(m.attachments) == 1, f'Anexo de dados em memória falou. Total de anexos ({len(m.attachments)}) deveria ser apenas 1'
+m.send_and_save()
+
+
+"""
+---------------------------------------------------
+----------- 2. TESTANDO FUNCIONALIDADES -----------
+    2.5 Enviando DataFrames no corpo do e-mail
 ---------------------------------------------------
 """
 
@@ -173,17 +215,17 @@ df_html = jex.df_to_html(df=df_filter)
 # Gerando imagem simples
 m = jex.create_message(
     account=acc,
-    subject='[Jaiminho] exchange_tests.py [4]',
-    body='4º teste de envio de e-mails com Jaiminho\n\n' + df_html,
+    subject='[Jaiminho] exchange_tests.py [5] - DataFrame no Body',
+    body='Envio de e-mail utilizando DataFrame formatado no body\n\n' + df_html,
     to_recipients=MAIL_TO
 )
-#m.send_and_save()
+m.send_and_save()
 
 
 """
 ---------------------------------------------------
 ----------- 2. TESTANDO FUNCIONALIDADES -----------
-    2.4 Envio de e-mail utilizando função única
+    2.6 Envio de e-mail utilizando função única
 ---------------------------------------------------
 """
 
@@ -194,14 +236,23 @@ jex.send_mail(
     server=SERVER,
     mail_box=MAIL_BOX,
     mail_to=MAIL_TO,
-    subject='[Jaiminho] exchange_tests.py [5]',
-    body='5º teste de envio de e-mails com Jaiminho',
-    send=False
+    subject='[Jaiminho] exchange_tests.py [6] - Método Consolidado',
+    body='Enviando e-mail simples a partir de método consolidado send_mail()',
+    send=True
 )
 
+
+"""
+---------------------------------------------------
+----------- 2. TESTANDO FUNCIONALIDADES -----------
+      2.7 Utilizando função única com anexos
+---------------------------------------------------
+"""
+
 # Preparando zip de anexo para envio (nomes e arquivos)
-FILENAMES = [os.path.basename(p) for p in PATHS]
-attachments = zip(FILENAMES, MEM_ATTACHMENTS)
+FILENAMES = ['Damian Lillard.png', 'nba_players_stats.csv']
+CONTENTS = [img, CSV_FILENAME]
+attachments = zip(FILENAMES, CONTENTS)
 
 # Enviando e-mail com anexos
 jex.send_mail(
@@ -210,9 +261,28 @@ jex.send_mail(
     server=SERVER,
     mail_box=MAIL_BOX,
     mail_to=MAIL_TO,
-    subject='[Jaiminho] exchange_tests.py [6]',
-    body='6º teste de envio de e-mails com Jaiminho',
+    subject='[Jaiminho] exchange_tests.py [7] - Método Consolidado com Anexo',
+    body='Enviando e-mail a partir de método consolidado send_mail() com anexo em memória e local + DataFrame no body\n\n' + df_html,
     zip_attachments=attachments,
-    send=False
+    send=True
 )
 
+"""
+---------------------------------------------------
+----------- 2. TESTANDO FUNCIONALIDADES -----------
+   2.8 Utilizando função única com imagem no body
+---------------------------------------------------
+"""
+
+# Enviando e-mail com anexos
+jex.send_mail(
+    username=MAIL_USERNAME,
+    password=os.getenv('PASSWORD'),
+    server=SERVER,
+    mail_box=MAIL_BOX,
+    mail_to=MAIL_TO,
+    subject='[Jaiminho] exchange_tests.py [8] - Método Consolidado com Imagem no Body',
+    body='Enviando e-mail a partir de método consolidado send_mail() com imagem e DataFrame no body:\n\n<img src="cid:Damian Lillard.png">\n\n' + df_html,
+    zip_attachments=zip(['Damian Lillard.png'], [img]),
+    send=True
+)
