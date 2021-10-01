@@ -37,12 +37,12 @@ reqs = [str(ir.req) for ir in install_reqs]"""
 # Criando setup
 setup(
     name='jaiminho',
-    version='0.0.6',
+    version='0.0.7',
     author='Thiago Panini',
     author_email='thipanini94@gmail.com',
     packages=find_packages(),
     install_requires=[
-        'exchangelib',
+        'exchangelib<=4.5.0',
         'pandas',
         'pretty-html-table'
     ],
