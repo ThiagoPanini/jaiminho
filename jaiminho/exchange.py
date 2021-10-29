@@ -178,7 +178,7 @@ def create_message(account, subject, body, to_recipients):
     return m
 
 # Anexando arquivos à mensagem
-def attach_file(message, file, attachment_name, is_inline=True):
+def attach_file(message, file, attachment_name, is_inline=False):
     """
     Anexa arquivos a uma mensagem já criada. De forma
     interna e dinâmica, o código desenvolvido verifica
